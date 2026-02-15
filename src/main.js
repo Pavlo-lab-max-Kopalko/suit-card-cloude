@@ -1,25 +1,45 @@
 import './style.css'
+import counter from './modules/counter';
 
-const item = document.getElementsByClassName("game-field");
-const options = document.getElementsByClassName("options")[0];
-const spadeWrapper = document.getElementsByClassName("spade")[0];
-let spade = spadeWrapper.firstElementChild;
-const heart = document.getElementsByClassName("heart")[0];
-const diamond = document.getElementsByClassName("diamond")[0];
-const club = document.getElementsByClassName("club")[0];
-
-// const fieldsSqaud = document.querySelectorAll('.')
-
-console.log(item[0].getBoundingClientRect().left);
-console.log(item[0].getBoundingClientRect().right);
-console.log(spade);
-
+const newGame = new counter();
+const rows = document.getElementsByClassName("game-field")[0].children;
+const gameField = document.getElementsByClassName("game-field")[0];
 let copySymbol = null;
+
+console.log(rows);
+
+const getPositionOfEelemBelow = (elemBelow) => {
+  const x = Array.from(rows).findIndex(row => {
+    return row === elemBelow.parentElement;
+  });
+
+  let y = Array.from(Array.from(rows)[x].children).findIndex(row => {
+    return row === elemBelow;
+  });
+
+  // console.log({ x, y });
+
+  return { x, y };
+}
+
+const getSuitOfIcon = (iconSuit) => {
+  console.log(iconSuit.getAttribute('alt'));
+
+  return iconSuit.getAttribute('alt');
+};
+
+const onHoverIcon = (element) => {
+  element.onmouseenter = function(event) {
+    const positionOfSlot = getPositionOfEelemBelow(element);
+
+    newGame.getBounderySuits(positionOfSlot);
+  }
+};
 
 const onMouseDown = (element) => {
   const parentElement = element.parentElement;
 
-  element.onmousedown = function (event) {
+  element.onmousedown = function(event) {
     // (1) prepare to moving: make absolute and on top by z-index
     let shiftX = event.clientX - element.getBoundingClientRect().left;
     let shiftY = event.clientY - element.getBoundingClientRect().top;
@@ -46,27 +66,26 @@ const onMouseDown = (element) => {
 
       copySymbol.hidden = true;
       let elemBelow = document.elementFromPoint(event.clientX, event.clientY);
+
       copySymbol.hidden = false;
 
       if (!elemBelow) return;
 
       if (prevElement) {
-        console.log(prevElement);
-
         prevElement.style.backgroundColor = '';
       }
 
-      if (elemBelow.classList.contains('squadItem')) {
-        console.log(elemBelow.classList.contains('squadItem'));
+      if (elemBelow.classList.contains('squadItem') && elemBelow.children.length === 0) {
         elemBelow.style.backgroundColor = 'red';
         prevElement = elemBelow;
       } else {
         prevElement = null;
       }
 
-      if (prevElement) {
-        // copySymbol.style.position = 'relative';
-        // prevElement.append(copySymbol);
+      if (elemBelow.children.length > 1 && elemBelow.classList.contains('squadItem')) {
+        elemBelow.style.backgroundColor = 'blue';
+
+        console.log('blue');
       }
     }
 
@@ -79,10 +98,24 @@ const onMouseDown = (element) => {
       copySymbol.onmouseup = null;
       
       copySymbol.remove();
-      prevElement.append(copySymbol);
-      copySymbol.style.position = 'static';
 
-      prevElement.style.backgroundColor = '';
+      // console.log(prevElement.children.length);
+
+      if (prevElement && prevElement.children.length === 0) {
+        prevElement.append(copySymbol);
+        const coordinates = getPositionOfEelemBelow(prevElement);
+
+        console.log(coordinates);
+
+        const suit = getSuitOfIcon(copySymbol);
+        newGame.toPushSuitToTheSquare(coordinates, suit);
+      }
+
+      if (prevElement) {
+        prevElement.style.backgroundColor = '';
+      }
+
+      copySymbol.style.position = 'static';
     };
 
     copySymbol.ondragstart = function () {
@@ -95,14 +128,5 @@ const onMouseDown = (element) => {
   };
 }
 
-// spade.onmouseover
-
 document.querySelectorAll('.options img').forEach(onMouseDown);
-
-console.log(document.querySelectorAll('.options img'));
-
-options.addEventListener("click", (event) => {
-  console.log(event.target);
-  console.log(options);
-  console.log(event.target === spade);
-});
+document.querySelectorAll('.series div').forEach(onHoverIcon); // onMouseDown
