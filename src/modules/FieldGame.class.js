@@ -21,8 +21,6 @@ export default class FieldGame {
     for (const ch of activePositions) {
       this.initialFields[ch[0]][ch[1]] = '';
     }
-
-    console.log(this.initialFields);
   }
 
   getBounderySuits(
