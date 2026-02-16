@@ -6,8 +6,6 @@ const rows = document.getElementsByClassName("game-field")[0].children;
 const gameField = document.getElementsByClassName("game-field")[0];
 let copySymbol = null;
 
-console.log(rows);
-
 const getPositionOfEelemBelow = (elemBelow) => {
   const x = Array.from(rows).findIndex(row => {
     return row === elemBelow.parentElement;
@@ -17,29 +15,49 @@ const getPositionOfEelemBelow = (elemBelow) => {
     return row === elemBelow;
   });
 
-  // console.log({ x, y });
-
   return { x, y };
 }
 
 const getSuitOfIcon = (iconSuit) => {
-  console.log(iconSuit.getAttribute('alt'));
-
   return iconSuit.getAttribute('alt');
 };
 
 const onHoverIcon = (element) => {
-  element.onmouseenter = function(event) {
+  let activePositions = [];
+
+  element.onmouseenter = function (event) {
     const positionOfSlot = getPositionOfEelemBelow(element);
 
-    const activePositions = newGame.getBounderySuits(positionOfSlot) || [];
+    activePositions = newGame.getBounderySuits(positionOfSlot) || [];
 
-    const [x, y] = activePositions;
+    activePositions.forEach(coords => {
+      const [x, y] = coords;
 
-    console.log(activePositions);
+      gameField.children[x].children[y].style.backgroundColor = 'grey';
+    });
+  }
 
-    gameField.forEach(element => {
-      // element.children[x].children[y].style.backgroundColor = 'grey';
+  element.onmouseleave = function () {
+    activePositions.forEach(coords => {
+      const [x, y] = coords;
+
+      gameField.children[x].children[y].style.backgroundColor = '';
+    });
+
+  };
+
+  element.onclick = function () {
+    activePositions.forEach(coords => {
+      const [x, y] = coords;
+
+      const slot = gameField.children[x].children[y];
+
+      const img = slot.querySelector('img');
+
+      if (img) {
+        img.remove();
+        slot.style.backgroundColor = '';
+      }
     });
   }
 };
@@ -47,8 +65,7 @@ const onHoverIcon = (element) => {
 const onMouseDown = (element) => {
   const parentElement = element.parentElement;
 
-  element.onmousedown = function(event) {
-    // (1) prepare to moving: make absolute and on top by z-index
+  element.onmousedown = function (event) {
     let shiftX = event.clientX - element.getBoundingClientRect().left;
     let shiftY = event.clientY - element.getBoundingClientRect().top;
 
@@ -58,13 +75,11 @@ const onMouseDown = (element) => {
 
     document.body.append(copySymbol);
 
-    // centers the spade at (pageX, pageY) coordinates
     function moveAt(pageX, pageY) {
       copySymbol.style.left = pageX - shiftX + 'px';
       copySymbol.style.top = pageY - shiftY + 'px';
     }
 
-    // move our absolutely positioned spade under the pointer
     moveAt(event.pageX, event.pageY);
 
     let prevElement = null;
@@ -92,28 +107,20 @@ const onMouseDown = (element) => {
 
       if (elemBelow.children.length > 1 && elemBelow.classList.contains('squadItem')) {
         elemBelow.style.backgroundColor = 'blue';
-
-        console.log('blue');
       }
     }
 
-    // (2) move the spade on mousemove
     document.addEventListener('mousemove', onMouseMove);
 
-    // (3) drop the spade, remove unneeded handlers
     copySymbol.onmouseup = function () {
       document.removeEventListener('mousemove', onMouseMove);
       copySymbol.onmouseup = null;
-      
-      copySymbol.remove();
 
-      // console.log(prevElement.children.length);
+      copySymbol.remove();
 
       if (prevElement && prevElement.children.length === 0) {
         prevElement.append(copySymbol);
         const coordinates = getPositionOfEelemBelow(prevElement);
-
-        console.log(coordinates);
 
         const suit = getSuitOfIcon(copySymbol);
         newGame.toPushSuitToTheSquare(coordinates, suit);
@@ -137,4 +144,4 @@ const onMouseDown = (element) => {
 }
 
 document.querySelectorAll('.options img').forEach(onMouseDown);
-document.querySelectorAll('.series div').forEach(onHoverIcon); // onMouseDown
+document.querySelectorAll('.series div').forEach(onHoverIcon); 

@@ -24,6 +24,10 @@ export default class FieldGame {
     return this.initialFields;
   };
 
+  delete(coordinates) {
+    this.initialFields = this.getState();
+  }
+
   getBounderySuits(
     { x, y } = positionOfSlot
   ) {
@@ -52,11 +56,6 @@ export default class FieldGame {
       if (this.initialFields[x]?.[y] === suit) {
         arr.push([x, y]);
 
-        console.log(this.initialFields[x + 1]?.[y], x, y);
-        console.log(this.initialFields[x - 1]?.[y], x, y);
-        console.log(this.initialFields[x]?.[y + 1], x, y);
-        console.log(this.initialFields[x]?.[y - 1], x, y);
-
         isCloud(x + 1, y, suit);
         isCloud(x - 1, y, suit);
         isCloud(x, y + 1, suit);
@@ -65,9 +64,6 @@ export default class FieldGame {
     }
 
     isCloud(x, y, suitOfSlot);
-
-    console.log(arr);
-    console.log(calculatedSlots);
 
     return arr;
   }
