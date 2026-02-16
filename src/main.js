@@ -32,7 +32,15 @@ const onHoverIcon = (element) => {
   element.onmouseenter = function(event) {
     const positionOfSlot = getPositionOfEelemBelow(element);
 
-    newGame.getBounderySuits(positionOfSlot);
+    const activePositions = newGame.getBounderySuits(positionOfSlot) || [];
+
+    const [x, y] = activePositions;
+
+    console.log(activePositions);
+
+    gameField.forEach(element => {
+      // element.children[x].children[y].style.backgroundColor = 'grey';
+    });
   }
 };
 
