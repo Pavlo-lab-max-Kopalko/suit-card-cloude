@@ -11,21 +11,18 @@ export default class FieldGame {
     ]
   ) {
     this.initialFields = initialFields;
-    this.coordsOfSquares = [];
-
-    for (let i = 0; i < initialFields.length; i++) {
-      for (let j = 0; j < initialFields[i].length; j++) {
-        this.coordsOfSquares.push([i, j]);
-      }
-    }
   }
 
   getState() {
     return this.initialFields;
   };
 
-  delete(coordinates) {
-    this.initialFields = this.getState();
+  delete(activePositions) {
+    for (const ch of activePositions) {
+      this.initialFields[ch[0]][ch[1]] = '';
+    }
+
+    console.log(this.initialFields);
   }
 
   getBounderySuits(

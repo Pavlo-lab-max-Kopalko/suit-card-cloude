@@ -1,32 +1,16 @@
-import './style.css'
-import counter from './modules/counter';
+import FieldGame from './src/modules/FieldGame.class.js';
+import getSuitOfIcon from './src/functions/getSuitOfIcon.js';
+import getPositionOfEelemBelow from './src/functions/getPositionOfEelemBelow.js';
 
-const newGame = new counter();
+const newGame = new FieldGame();
 const rows = document.getElementsByClassName("game-field")[0].children;
 const gameField = document.getElementsByClassName("game-field")[0];
-let copySymbol = null;
-
-const getPositionOfEelemBelow = (elemBelow) => {
-  const x = Array.from(rows).findIndex(row => {
-    return row === elemBelow.parentElement;
-  });
-
-  let y = Array.from(Array.from(rows)[x].children).findIndex(row => {
-    return row === elemBelow;
-  });
-
-  return { x, y };
-}
-
-const getSuitOfIcon = (iconSuit) => {
-  return iconSuit.getAttribute('alt');
-};
 
 const onHoverIcon = (element) => {
   let activePositions = [];
 
-  element.onmouseenter = function (event) {
-    const positionOfSlot = getPositionOfEelemBelow(element);
+  element.onmouseenter = function () {
+    const positionOfSlot = getPositionOfEelemBelow(element, rows);
 
     activePositions = newGame.getBounderySuits(positionOfSlot) || [];
 
@@ -43,10 +27,11 @@ const onHoverIcon = (element) => {
 
       gameField.children[x].children[y].style.backgroundColor = '';
     });
-
   };
 
   element.onclick = function () {
+    newGame.delete(activePositions);
+
     activePositions.forEach(coords => {
       const [x, y] = coords;
 
@@ -63,6 +48,7 @@ const onHoverIcon = (element) => {
 };
 
 const onMouseDown = (element) => {
+  let copySymbol = null;
   const parentElement = element.parentElement;
 
   element.onmousedown = function (event) {
@@ -120,7 +106,7 @@ const onMouseDown = (element) => {
 
       if (prevElement && prevElement.children.length === 0) {
         prevElement.append(copySymbol);
-        const coordinates = getPositionOfEelemBelow(prevElement);
+        const coordinates = getPositionOfEelemBelow(prevElement, rows);
 
         const suit = getSuitOfIcon(copySymbol);
         newGame.toPushSuitToTheSquare(coordinates, suit);
